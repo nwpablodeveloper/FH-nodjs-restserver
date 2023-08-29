@@ -1,44 +1,92 @@
 const { response } = require('express')
+const bcrypt = require('bcryptjs');
 
-const usuariosGet = (req, res = response ) => {
+const Usuario = require('../models/usuario');
 
-    console.log(req);
-    const { q, nombre = 'no name', limit = 1, page = 1 } = req.query;
+const usuariosGet = async (req, res = response ) => {
+    
+    const { desde = 0, limit } = req.query;
+    const query = { estado: true }
+
+/* 
+    const documentos = await Usuario.countDocuments( query );
+
+    const usuarios = await Usuario.find( query )
+                                    .skip( desde )
+                                    .limit( limit )
+ */
+    
+    // ejecutar todas las promesas de forma simultanea
+    const [ documentos, usuarios ] = await Promise.all([
+
+        Usuario.countDocuments( query ),
+
+        Usuario.find( query )
+                .skip( desde )
+                .limit( limit ),
+                
+    ]);
+    
 
     res.json({
-        q,
-        nombre,
-        limit,
-        page
+        documentos,
+        usuarios
     });
 }
 
-const usuariosPost = (req, res = response ) => {
+const usuariosPost = async (req, res = response ) => {
 
-    const { nombre, edad } = req.body;
+    
+    const { nombre, correo, password, rol } = req.body;
+    
+    const usuario = new Usuario({ 
+        nombre, 
+        correo, 
+        password,
+        rol
+    });                    
+
+    const salt = bcrypt.genSaltSync(7);
+    usuario.password = bcrypt.hashSync( password, salt );
+    
+    await usuario.save();
 
     res.json({
-        nombre,
-        edad
+        usuario
     });
+
 }
 
-const usuariosPut = (req, res = response ) => {
+const usuariosPut = async (req, res = response ) => {
 
-    res.json({
-        nombre: 'Get API'
-    });
+    const { id } = req.params;
+    const { _id, password, google, ...resto } = req.body;
+
+    // TODO validar contra DB
+
+    if( password ) {
+        const salt = bcrypt.genSaltSync(7);
+        resto.password = bcrypt.hashSync( password, salt );
+    }
+
+    const usuario = await Usuario.findByIdAndUpdate( id, resto )
+
+    res.json({ usuario });
 }
 
-const usuariosPath = (req, res = response ) => {
-    res.json({
-        nombre: 'Patch API'
-    });
-}
 
-const usuariosDelete = (req, res = response ) => {
+const usuariosDelete = async ( req, res ) => {
+
+    const { id } = req.params;
+
+
+    // Borrar fisicamente
+    // const usuario = await Usuario.findByIdAndDelete( id );
+
+    const usuario = await Usuario.findByIdAndUpdate( id, { estado: false } );
+
     res.json({
-        nombre: 'Delete API'
+        usuario
     });
 }
 
@@ -47,7 +95,6 @@ const usuariosDelete = (req, res = response ) => {
 module.exports = {
     usuariosGet,
     usuariosPost,
-    usuariosPath,
     usuariosPut,
     usuariosDelete
 }
