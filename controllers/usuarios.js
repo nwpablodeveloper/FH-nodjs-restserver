@@ -1,4 +1,4 @@
-const { response } = require('express')
+const { response, request } = require('express')
 const bcrypt = require('bcryptjs');
 
 const Usuario = require('../models/usuario');
@@ -36,6 +36,26 @@ const usuariosGet = async (req, res = response ) => {
 
 const usuariosPost = async (req, res = response ) => {
 
+    console.log('uasdf');
+
+    // CARGA AUTOMATICA DE USUARIOS
+/* 
+    for (let i = 0; i < 50; i++) {
+        const usuario = new Usuario({
+            nombre: `Pablo ${ i }`,
+            correo: `test${ i }@test.com`,
+            password: `12345678`,
+            rol: `USER_ROLE`
+        });
+
+        const salt = bcrypt.genSaltSync(12);
+        usuario.password = bcrypt.hashSync( '12345678', salt );
+
+        // console.log(usuario);
+
+        await usuario.save();
+    }
+ */
     
     const { nombre, correo, password, rol } = req.body;
     
@@ -75,19 +95,19 @@ const usuariosPut = async (req, res = response ) => {
 }
 
 
-const usuariosDelete = async ( req, res ) => {
-
-    const { id } = req.params;
-
-
+const usuariosDelete = async ( req = request, res ) => {
     // Borrar fisicamente
     // const usuario = await Usuario.findByIdAndDelete( id );
 
+    const { id } = req.params;
+    
     const usuario = await Usuario.findByIdAndUpdate( id, { estado: false } );
 
     res.json({
-        usuario
+        usuario,
+        // usuarioAutenticado: req.usuario
     });
+    
 }
 
 

@@ -2,6 +2,7 @@ require('colors');
 const cors = require('cors');
 const express = require('express');
 
+
 const { dbConection } = require('../database/config');
 
 class Server {
@@ -10,7 +11,9 @@ class Server {
 
         this.app = express();
         this.port = process.env.PORT;
-        this.usuariosPath = '/api/usuarios';
+        
+        this.usuariosPath   = '/api/usuarios';
+        this.authPath       = '/api/auth';
 
         // Conectar a DB
         this.conectarDB();
@@ -52,7 +55,8 @@ class Server {
 
     routes() {
 
-        this.app.use( this.usuariosPath, require('../routes/usuarios'));
+        this.app.use( this.authPath, require( '../routes/auth' ) );
+        this.app.use( this.usuariosPath, require( '../routes/usuarios' ));
 
     }
 
