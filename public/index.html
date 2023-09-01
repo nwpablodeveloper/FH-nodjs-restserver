@@ -10,6 +10,10 @@
 <body>
 
     <h1>Google Sign-in</h1>
+
+    <button  id="google-signOut">
+        Cerrar sesión
+    </button>
     
     <div id="g_id_onload"
        data-client_id="52988815661-1gtirmd415eau98k82p88eb8teadfpiq.apps.googleusercontent.com"
@@ -46,9 +50,26 @@
             .then( resp => resp.json() )
             .then( resp => {
                 console.log(resp);
+                localStorage.setItem('correo', resp.usuario.correo );
+                location.reload();
             })
             .catch(console.warn)
 
+        }
+
+        const button = document.getElementById( 'google-signOut' );
+
+        button.onclick = () => {
+
+            console.log( google.accounts.id );
+            google.accounts.id.disableAutoSelect();
+            google.accounts.id.revoke( localStorage.getItem('correo'), done => {
+                // localStorage.clear();
+                localStorage.removeItem('correo');
+
+                location.reload();
+            });
+            
         }
             
     

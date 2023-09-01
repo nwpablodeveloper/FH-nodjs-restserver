@@ -1,6 +1,7 @@
 const { request, response } = require("express");
 const bcryptjs = require('bcryptjs');
-const jwt = require('jsonwebtoken');
+const { googleVerify } = require("../helpers/google-verify");
+// const jwt = require('jsonwebtoken');
 
 const { generarJWT } = require("../helpers/generarJWT");
 const Usuario = require('../models/usuario');
@@ -56,12 +57,49 @@ const googleSignIn = async ( req = request, res = response ) => {
 
     const { id_token } =  req.body;
 
-    console.log(id_token);
+    try {
 
-    res.json({
-        msg: 'Token recibido',
-        id_token,
-    });
+        const { correo, img, nombre } = await googleVerify( id_token );
+
+        let usuario = await Usuario.findOne( { correo } );
+
+        if ( !usuario ) {
+            const data = {
+                nombre,
+                correo,
+                img,
+                google: true,
+                rol: 'USER_ROLE',
+                password: ':P',
+            }
+            
+            usuario = new Usuario( data );
+            await usuario.save();
+        }
+
+        if ( !usuario.estado ) {
+            return res.status(401).json({
+                msg: 'Usuario baneado, hable con el admin'
+            });
+        }
+
+        const token = await generarJWT( usuario.id );
+
+        res.json({
+            usuario,
+            token
+        });
+
+
+    } catch (error) {
+
+        console.log(error);
+
+        res.status(400).json({
+            msg: 'Error de Google Token'
+        })
+    }
+
 
 }
 
