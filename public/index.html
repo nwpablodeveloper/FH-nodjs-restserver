@@ -38,8 +38,10 @@
 
             // console.log(response.credential);
 
+            // Enviamos la credencial de google "TOKEN" en el body por HTTP post al backend
             const body = { id_token: response.credential };
 
+            // la URL tiene que estar autorizada en la API de Google
             fetch('http://localhost:8080/api/auth/google', {
                 method: 'POST',
                 headers: {
@@ -49,9 +51,9 @@
             })
             .then( resp => resp.json() )
             .then( resp => {
-                console.log(resp);
+                console.log( { resp } );
                 localStorage.setItem('correo', resp.usuario.correo );
-                location.reload();
+                // location.reload();
             })
             .catch(console.warn)
 

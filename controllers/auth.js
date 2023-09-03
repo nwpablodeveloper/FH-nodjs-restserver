@@ -57,8 +57,9 @@ const googleSignIn = async ( req = request, res = response ) => {
 
     const { id_token } =  req.body;
 
-    try {
 
+    try {
+                                            // Verifico el usuario en google API
         const { correo, img, nombre } = await googleVerify( id_token );
 
         let usuario = await Usuario.findOne( { correo } );

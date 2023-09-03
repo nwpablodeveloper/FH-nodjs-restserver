@@ -10,6 +10,9 @@ async function googleVerify( tokenGoogle = '' ) {
         
     });
 
+    // Recibo toda la info del usuario desde Google
+    // console.log(ticket.getPayload());
+
     const { email, name, picture } = ticket.getPayload();
     
     return {

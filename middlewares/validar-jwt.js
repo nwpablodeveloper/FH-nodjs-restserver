@@ -9,7 +9,7 @@ const validarJWT = async ( req = request, res = response, next ) => {
 
     if ( !token ) {
         return res.status(401).json({
-            msg: 'No hay token en la petición'
+            msg: 'x-token no encontrado en la petición'
         });
     }
 
@@ -33,6 +33,7 @@ const validarJWT = async ( req = request, res = response, next ) => {
 
 
         req.usuario = usuario;
+
         
         next();
 
